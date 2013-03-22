@@ -15,7 +15,7 @@ module Redmine
         @configuration ||= Configuration.new
       end
 
-      def report(subject_or_exception=nil)
+      def report(subject_or_exception=nil, &block)
         r = Report.new
 
         if subject_or_exception.is_a?(Exception)
@@ -29,7 +29,7 @@ module Redmine
           r.subject(subject_or_exception)
         end
 
-        yield(r)
+        block.bind(r).call
 
         r.commit
       end
