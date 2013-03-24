@@ -37,9 +37,9 @@ module Redmine
           resp = HTTParty.post("#{config.base_url}/issues.json", options.merge({
               body: {
                 issue: {
-                  subject: @subject,
+                  subject: @subject.strip,
                   project_id: config.project,
-                  description: @description,
+                  description: @description.strip,
                   tracker_id: config.tracker,
                   category_id: config.category
                 }
@@ -76,6 +76,7 @@ module Redmine
         @current_var << "#{type}. #{title}\n\n"
         data_to_syntax(content) unless content.nil?
         data_to_syntax(&block) if block_given?
+        @current_var << "\n\n"
         nil
       end
 
@@ -88,7 +89,7 @@ module Redmine
       end
 
       def output(content)
-        @current_var << content
+        @current_var << "#{content}\n"
         nil
       end
 
@@ -105,7 +106,7 @@ module Redmine
       def issue_hash
         config = Redmine::Reporting.configuration
 
-        Digest::SHA1.hexdigest([config.base_url, config.project, @subject, @description].join('//'))
+        Digest::SHA1.hexdigest([config.base_url, config.project, @subject.strip, @description.strip].join('//'))
       end
 
       def issue_id_file
