@@ -66,7 +66,8 @@ module Redmine
           }))
 
         reference_id
-      rescue Timeout::Error
+      rescue => e
+        # TODO ignore
         nil
       end
 
