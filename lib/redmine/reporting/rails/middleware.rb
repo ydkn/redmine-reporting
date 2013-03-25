@@ -29,11 +29,6 @@ module Redmine
           return unless desc = env["action_controller.instance"].try(:redmine_reporting_request_data)
 
           Redmine::Reporting.report(exception) do
-            description do
-              section("#{exception.class}: #{exception.message}") do
-                output("<pre>#{exception.backtrace.join("\n")}</pre>")
-              end unless exception.nil?
-            end
             notes do
               section("URL: #{desc[:url]}", '')
               section('Parameters') do
