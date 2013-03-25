@@ -46,11 +46,9 @@ module Redmine
               }.to_json
             }))
 
-          issue_id = resp['issue']['id'] rescue nil
+          iid = resp['issue']['id'] rescue nil
 
-          unless issue_id.nil?
-            File.open(issue_id_file, File::CREAT|File::TRUNC|File::RDWR, 0600) {|f| f.write(issue_id.to_s)}
-          end
+          File.open(issue_id_file, File::CREAT|File::TRUNC|File::RDWR, 0600) {|f| f.write(iid.to_s)} unless iid.nil?
         end
 
         return false if issue_id.nil?

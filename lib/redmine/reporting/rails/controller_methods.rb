@@ -36,11 +36,7 @@ module Redmine
         private
 
         def redmine_reporting_local_request?
-          if defined?(::Rails.application.config)
-            ::Rails.application.config.consider_all_requests_local || (request.local? && (!request.env["HTTP_X_FORWARDED_FOR"]))
-          else
-            consider_all_requests_local || (local_request? && (!request.env["HTTP_X_FORWARDED_FOR"]))
-          end
+          ::Rails.application.config.consider_all_requests_local || (request.local? && (!request.env["HTTP_X_FORWARDED_FOR"]))
         end
 
         def redmine_reporting_filter_hash(hash)
