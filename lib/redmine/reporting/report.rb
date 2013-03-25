@@ -26,12 +26,12 @@ module Redmine
       def commit
         config = Redmine::Reporting.configuration
 
-        options = {
+        options = (config.http_options || {}).merge({
           headers: {
             'Content-type' => 'application/json',
             'X-Redmine-API-Key' => config.api_key
           }
-        }
+        })
 
         if issue_id.nil?
           resp = HTTParty.post("#{config.base_url}/issues.json", options.merge({
@@ -49,7 +49,7 @@ module Redmine
           issue_id = resp['issue']['id'] rescue nil
 
           unless issue_id.nil?
-            File.open(issue_id_file, File::CREAT|File::TRUNC|File::RDWR, 0600) {|f| f.write(issue_id.to_s) }
+            File.open(issue_id_file, File::CREAT|File::TRUNC|File::RDWR, 0600) {|f| f.write(issue_id.to_s)}
           end
         end
 
@@ -60,7 +60,7 @@ module Redmine
         resp = HTTParty.put("#{config.base_url}/issues/#{issue_id}.json", options.merge({
             body: {
               issue: {
-                notes: "h1. #{reference_id}\n\n#{@notes}"
+                notes: "h1. #{reference_id}\n\n#{@notes}".strip
               }
             }.to_json
           }))
