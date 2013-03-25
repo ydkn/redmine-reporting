@@ -28,13 +28,14 @@ module Redmine
         def redmine_report(env, exception)
           return unless desc = env["action_controller.instance"].try(:redmine_reporting_request_data)
 
-          Redmine::Reporting.report(exception.message) do
+          Redmine::Reporting.report(exception) do
             description do
-              section(exception.message) do
+              section("#{exception.class}: #{exception.message}") do
                 output("<pre>#{exception.backtrace.join("\n")}</pre>")
               end unless exception.nil?
             end
             notes do
+              section("URL: #{desc[:url]}", '')
               section('Parameters') do
                 output(desc[:params].collect{|k,v| "* #{k}: #{v}"}.join("\n"))
               end

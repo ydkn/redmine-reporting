@@ -21,7 +21,7 @@ module Redmine
         if subject_or_exception.is_a?(Exception)
           r.subject(subject_or_exception.message)
           r.description do
-            section(subject_or_exception.message) do
+            section("#{subject_or_exception.class}: #{subject_or_exception.message}") do
               output("<pre>#{subject_or_exception.backtrace.join("\n")}</pre>")
             end
           end
