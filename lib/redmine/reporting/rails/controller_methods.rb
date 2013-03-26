@@ -23,9 +23,9 @@ module Redmine
 
         # This method should be used for sending manual notifications while you are still
         # inside the controller. Otherwise it works like Redmine::Reporting.report.
-        def redmine_report(subject_or_exception, &block)
+        def redmine_report(subject_or_exception, options={}, &block)
           unless redmine_reporting_local_request?
-            @redmine_reporting_reference_id = env['redmine_reporting.reference_id'] = Redmine::Reporting.report(subject_or_exception, &block)
+            @redmine_reporting_reference_id = env['redmine_reporting.reference_id'] = Redmine::Reporting.report(subject_or_exception, options, &block)
           end
         end
 

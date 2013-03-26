@@ -7,6 +7,10 @@ module Redmine
   module Reporting
     class Report
 
+      def initialize(options)
+        @options = options.dup.freeze
+      end
+
       def subject(s)
         @subject = s
       end
@@ -24,24 +28,22 @@ module Redmine
       end
 
       def commit
-        config = Redmine::Reporting.configuration
-
-        options = (config.http_options || {}).merge({
+        options = (config[:http_options] || {}).merge({
           headers: {
             'Content-type' => 'application/json',
-            'X-Redmine-API-Key' => config.api_key
+            'X-Redmine-API-Key' => config[:api_key]
           }
         })
 
         if issue_id.nil?
-          resp = HTTParty.post("#{config.base_url}/issues.json", options.merge({
+          resp = HTTParty.post("#{config[:base_url]}/issues.json", options.merge({
               body: {
                 issue: {
                   subject: @subject.strip,
-                  project_id: config.project,
+                  project_id: config[:project],
                   description: @description.strip,
-                  tracker_id: config.tracker,
-                  category_id: config.category
+                  tracker_id: config[:tracker],
+                  category_id: config[:category]
                 }
               }.to_json
             }))
@@ -55,7 +57,7 @@ module Redmine
 
         reference_id = "#{Zlib.crc32(Time.now.to_f.to_s).to_s(16)}#{Zlib.crc32(@subject).to_s(16)}#{Zlib.crc32(@description).to_s(16)}"
 
-        resp = HTTParty.put("#{config.base_url}/issues/#{issue_id}.json", options.merge({
+        resp = HTTParty.put("#{config[:base_url]}/issues/#{issue_id}.json", options.merge({
             body: {
               issue: {
                 notes: "h1. #{reference_id}\n\n#{@notes}".strip
@@ -102,10 +104,12 @@ module Redmine
         nil
       end
 
-      def issue_hash
-        config = Redmine::Reporting.configuration
+      def config
+        @c ||= Redmine::Reporting.configuration.to_h.merge(@options)
+      end
 
-        Digest::SHA1.hexdigest([config.base_url, config.project, @subject.strip, @description.strip].join('//'))
+      def issue_hash
+        Digest::SHA1.hexdigest([config[:base_url], config[:project], @subject.strip, @description.strip].join('//'))
       end
 
       def issue_id_file

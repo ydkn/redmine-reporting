@@ -15,8 +15,8 @@ module Redmine
         @configuration ||= Configuration.new
       end
 
-      def report(subject_or_exception=nil, &block)
-        r = Report.new
+      def report(subject_or_exception=nil, options={}, &block)
+        r = Report.new(options)
 
         if subject_or_exception.is_a?(Exception)
           r.subject(subject_or_exception.message)

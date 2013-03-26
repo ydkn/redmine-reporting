@@ -19,6 +19,19 @@ module Redmine
         @http_options[:http_proxyuser] = username
         @http_options[:http_proxypass] = password
       end
+
+      def to_hash
+        {
+          base_url: self.base_url,
+          api_key: self.api_key,
+          project: self.project,
+          tracker: self.tracker,
+          category: self.category,
+          http_options: self.http_options
+        }
+      end
+
+      alias :to_h :to_hash
     end
   end
 end
