@@ -25,12 +25,12 @@ module Redmine
         # inside the controller. Otherwise it works like Redmine::Reporting.report.
         def redmine_report(subject_or_exception, &block)
           unless redmine_reporting_local_request?
-            env['redmine_reporting.reference_id'] = Redmine::Reporting.report(subject_or_exception, &block)
+            @redmine_reporting_reference_id = env['redmine_reporting.reference_id'] = Redmine::Reporting.report(subject_or_exception, &block)
           end
         end
 
         def redmine_report_reference_id
-          env['redmine_reporting.reference_id']
+          @redmine_reporting_reference_id || env['redmine_reporting.reference_id']
         end
 
         private
