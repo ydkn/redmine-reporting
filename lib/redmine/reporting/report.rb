@@ -28,6 +28,8 @@ module Redmine
       end
 
       def commit
+        reference_id = "#{Zlib.crc32(Time.now.to_f.to_s).to_s(16)}#{Zlib.crc32(@subject).to_s(16)}#{Zlib.crc32(@description).to_s(16)}"
+
         options = (config[:http_options] || {}).merge({
           headers: {
             'Content-type' => 'application/json',
@@ -35,7 +37,10 @@ module Redmine
           }
         })
 
-        if issue_id.nil?
+        # add reference_id to description if updates are disabled
+        @description = "h1. #{reference_id}\n\n#{@description}" if config[:no_update]
+
+        if saved_issue_id.nil?
           resp = HTTParty.post("#{config[:base_url]}/issues.json", options.merge({
               body: {
                 issue: {
@@ -50,12 +55,12 @@ module Redmine
 
           iid = resp['issue']['id'] rescue nil
 
-          File.open(issue_id_file, File::CREAT|File::TRUNC|File::RDWR, 0600) {|f| f.write(iid.to_s)} unless iid.nil?
+          save_issue_data(iid, reference_id) unless iid.nil?
         end
 
-        return false if issue_id.nil?
+        return false if (issue_id = saved_issue_id).nil?
 
-        reference_id = "#{Zlib.crc32(Time.now.to_f.to_s).to_s(16)}#{Zlib.crc32(@subject).to_s(16)}#{Zlib.crc32(@description).to_s(16)}"
+        return saved_reference_id if config[:no_update]
 
         resp = HTTParty.put("#{config[:base_url]}/issues/#{issue_id}.json", options.merge({
             body: {
@@ -64,6 +69,8 @@ module Redmine
               }
             }.to_json
           }))
+
+        save_issue_data(issue_id, reference_id)
 
         reference_id
       rescue => e
@@ -79,6 +86,10 @@ module Redmine
         data_to_syntax(&block) if block_given?
         @current_var << "\n\n"
         nil
+      end
+
+      def chapter(title, content=nil, &block)
+        syntax_section('h1', title, content, &block)
       end
 
       def section(title, content=nil, &block)
@@ -116,13 +127,26 @@ module Redmine
         File.join(Dir.tmpdir, "redmine_reporting_#{issue_hash}")
       end
 
-      def issue_id
+      def save_issue_data(issue_id, reference_id)
+        File.open(issue_id_file, File::CREAT|File::TRUNC|File::RDWR, 0600) {|f| f.write("#{issue_id.to_s};#{reference_id}")}
+      end
+
+      def read_issue_data
+        data = [nil, nil]
+
         if File.exists?(issue_id_file)
-          id = File.open(issue_id_file, 'r').read.strip.to_i
-          return id if id > 0
+          data = File.open(issue_id_file, 'r').read.split(';').collect{|d| d.strip} rescue [nil, nil]
         end
 
-        nil
+        data
+      end
+
+      def saved_issue_id
+        read_issue_data.first
+      end
+
+      def saved_reference_id
+        read_issue_data.last
       end
 
     end

@@ -30,12 +30,12 @@ module Redmine
 
           Redmine::Reporting.report(exception) do
             notes do
-              section("URL: #{desc[:url]}", '')
+              section("URL: #{desc[:url]} (#{desc[:params][:controller]}##{desc[:params][:action]})", '')
               section('Parameters') do
-                output(desc[:params].collect{|k,v| "* #{k}: #{v}"}.join("\n"))
+                output(desc[:params].select{|k,v| ![:controller, :action].include?(k)}.collect{|k,v| "* *#{k}:* #{v}"}.join("\n"))
               end
               section('Session') do
-                output(desc[:session].collect{|k,v| "* #{k}: #{v}"}.join("\n"))
+                output(desc[:session].collect{|k,v| "* *#{k}:* #{v}"}.join("\n"))
               end
             end
           end

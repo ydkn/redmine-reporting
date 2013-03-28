@@ -30,8 +30,8 @@ module Redmine
           http_options: self.http_options
         }
       end
-
       alias :to_h :to_hash
+
     end
   end
 end
