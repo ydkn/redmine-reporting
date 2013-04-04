@@ -39,14 +39,14 @@ module Redmine
 
         if saved_issue_id.nil?
           # add reference_id to description if updates are disabled
-          @description = "h1. #{reference_id}\n\n#{@description}" if config[:no_update]
+          desc = config[:no_update] ? "h1. #{reference_id}\n\n#{@description}" : @description
 
           resp = HTTParty.post("#{config[:base_url]}/issues.json", options.merge({
               body: {
                 issue: {
                   subject: @subject.strip,
                   project_id: config[:project],
-                  description: @description.strip,
+                  description: desc.strip,
                   tracker_id: config[:tracker],
                   category_id: config[:category]
                 }
